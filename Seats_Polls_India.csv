@@ -1,0 +1,43 @@
+Election_Year,Election_Day,Pollster,Stats,Media,min_Date,max_date,n,NDA,UPA,OTHER,Obs_NDA,Obs_UPA,Obs_OTHER,Error_NDA,Error_UPA,Error_OTHER
+2009,13-May-09,CNN-IBN_CSDS,CSDS,CNN-IBN,08-Jan-09,15-Jan-09,,175,225,143,159,262,122,87,-66,-21
+2009,13-May-09,Star_Nielsen,Nielsen,Star,05-Mar-09,17-Mar-09,,184,257,102,159,262,122,78,-98,20
+2009,13-May-09,Star_Nielsen,Nielsen,Star,26-Mar-09,03-Apr-09,,191,203,149,159,262,122,71,-44,-27
+2009,13-May-09,CVoter_The Week,CVoter,The Week,01-Mar-09,30-Apr-09,,186,234,123,159,262,122,76,-75,-1
+2009,13-May-09,Times of India,Times of India,Times of India,09-Mar-09,09-Mar-09,,195,146,202,159,262,122,67,13,-80
+2014,12-May-14,Times Now-CVoter,CVoter,Times Now,01-Jan-13,31-Mar-13,,184,128,231,336,60,147,152,-68,-84
+2014,12-May-14,Headlines Today-Cvoter,CVoter,Headlines Today,01-Apr-13,31-May-13,"120,000",220,155,168,336,60,147,116,-95,-21
+2014,12-May-14,ABP News-Nielsen,Nielsen,ABP News,01-May-13,31-May-13,"33,408",206,136,201,336,60,147,130,-76,-54
+2014,12-May-14,The Weekæ_ Hansa Research,Hansa Research,The Week,01-Jul-13,31-Jul-13,,197,184,162,336,60,147,139,-124,-15
+2014,12-May-14,CNN-IBNæandæThe Hinduæby CSDS,CSDS,CNN-IBN,01-Jul-13,31-Jul-13,"19,062",176,153,214,336,60,147,160,-93,-67
+2014,12-May-14,Times Now-India Today-CVoter,CVoter,"Times Now, India Today",01-Jul-13,31-Jul-13,"36,914",156,134,253,336,60,147,180,-74,-106
+2014,12-May-14,Times Now-India TV-CVoter,CVoter,"Times Now, India TV",01-Aug-13,31-Oct-13,"24,284",186,117,240,336,60,147,150,-57,-93
+2014,12-May-14,India Today-CVoter,CVoter,India Today,01-Dec-13,30-Jan-14,"21,792",212,103,228,336,60,147,124,-43,-81
+2014,12-May-14,ABP News-Nielsen,Nielsen,ABP News,01-Dec-13,30-Jan-14,"64,006",226,101,216,336,60,147,110,-41,-69
+2014,12-May-14,CNN-IBN-Lokniti-CSDS,CSDS-Lokniti,CNN-IBN,01-Jan-14,30-Jan-14,"18,591",221,117,205,336,60,147,115,-57,-58
+2014,12-May-14,Times Now-India TV-CVoter,CVoter,"Times Now, India TV",01-Jan-14,28-Feb-14,"14,000",227,101,215,336,60,147,109,-41,-68
+2014,12-May-14,ABP News-Nielsen,Nielsen,ABP News,01-Feb-14,28-Feb-14,"29,000",236,92,215,336,60,147,100,-32,-68
+2014,12-May-14,CNN-IBN-Lokniti-CSDS,CSDS-Lokniti,CNN-IBN,01-Feb-14,28-Feb-14,"29,000",222,129,192,336,60,147,114,-69,-45
+2014,12-May-14,NDTV-æHansa Research,Hansa Research,NDTV,01-Mar-14,31-Mar-14,"46,571",230,128,185,336,60,147,106,-68,-38
+2014,12-May-14,CNN-IBN-Lokniti-CSDS,CSDS,CNN-IBN,01-Mar-14,31-Mar-14,"20,957",240,117,186,336,60,147,96,-57,-39
+2014,12-May-14,NDTV-æHansa Research,Hansa Research,NDTV,01-Apr-14,30-Apr-14,"24,000",275,111,157,336,60,147,61,-51,-10
+2019,19-May-19,IndiaTV-CNXæ,CNX,India TV,07-Mar-19,06-Apr-19,,275,126,142,,,,,,
+2019,19-May-19,Jan Ki Baat,Jan Ki Baat,Jan Ki Baat,05-Mar-19,04-Apr-19,,310,122,111,,,,,,
+2019,19-May-19,Times Now-VMR,VMR,Times Now,01-Mar-19,31-Mar-19,,283,135,125,,,,,,
+2019,19-May-19,News Nation,News Nation,News Nation,01-Mar-19,31-Mar-19,,270,134,139,,,,,,
+2019,19-May-19,RepublicTV_C voter,CVoter,Republic TV,01-Mar-19,31-Mar-19,,264,141,138,,,,,,
+2019,19-May-19,IndiaTV-CNX,CNX,India TV,01-Mar-19,31-Mar-19,,285,126,132,,,,,,
+2019,19-May-19,Zee 24 Taas,Zee 24 Taas,Zee 24 Taas,01-Mar-19,31-Mar-19,,264,165,114,,,,,,
+2019,19-May-19,VDP Associates,VDP Associates,VDP Associates,29-Jan-19,28-Feb-19,,242,148,153,,,,,,
+2019,19-May-19,Times Now-VMR,VMR,Times Now,31-Dec-18,30-Jan-19,,252,147,144,,,,,,
+2019,19-May-19,ABP News -Cvoter,CVoter,ABP News,31-Dec-18,30-Jan-19,,233,167,143,,,,,,
+2019,19-May-19,India Today -Karvy,Karvy,India Today,31-Dec-18,30-Jan-19,,237,166,140,,,,,,
+2019,19-May-19,VDP Associates,VDP Associates,VDP Associates,31-Dec-18,30-Jan-19,,225,167,150,,,,,,
+2019,19-May-19,India Today,India Today,India Today,01-Dec-18,31-Dec-18,,257,146,140,,,,,,
+2019,19-May-19,ABP News _ C Voter,CVoter,ABP News,01-Dec-18,31-Dec-18,,247,171,125,,,,,,
+2019,19-May-19,India TV _ CNX,CNX,India TV,01-Dec-18,31-Dec-18,,281,124,138,,,,,,
+2019,19-May-19,ABP News _ C Voter,CVoter,ABP News,31-Oct-18,30-Nov-18,,261,119,163,,,,,,
+2019,19-May-19,ABP News,ABP News,ABP News,01-Oct-18,31-Oct-18,,276,112,155,,,,,,
+2019,19-May-19,India Today- Karvy,Karvy,India Today,01-Aug-18,31-Aug-18,,281,122,140,,,,,,
+2019,19-May-19,ABP News-CSDS,CSDS,ABP News,01-May-18,31-May-18,,274,164,105,,,,,,
+2019,19-May-19,Republic-CVoter,CVoter,Republic TV,31-Dec-17,30-Jan-18,,335,89,119,,,,,,
+2019,19-May-19,India Today,India Today,India Today,31-Dec-17,30-Jan-18,,309,102,132,,,,,,
