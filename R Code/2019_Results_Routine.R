@@ -78,8 +78,8 @@ colnames(CENSUS_counts_clean)
 # # remove totcount - this sample is at the individual level, don't need totcount of the category
 # sample_CENSUS = sample_CENSUS[,-which(names(sample_CENSUS)=="totcount"),with = FALSE]
 
-# save(sample_CENSUS,file = 'sample_CENSUS.RData',compress= TRUE)
-load(file = 'sample_CENSUS.RData')
+# save(sample_CENSUS,file = 'Generated Quantities/sample_CENSUS.RData',compress= TRUE)
+load(file = 'Generated Quantities/sample_CENSUS.RData')
 # # #
 # # # 3) Load National Election Study to augment individual-level data to include Political variables.
 # # #
@@ -165,8 +165,8 @@ HIST_ST = cbind(HIST_ST[,c("states","zones"),with = FALSE],
 NES14_clean$TEMP_alliance_vote =as.factor(ifelse(NES14_clean$turnout==0,'stayed home',as.character(unlist(NES14_clean$alliance_vote))))
 # # # complete NES just for the raking - will use incomplete in multiple imp.
 # NES14_clean_misstemp = missRanger::missRanger(data = NES14_clean,pmm.k = 30,maxiter = 30,verbose = TRUE,returnOOB = TRUE)
-# save(NES14_clean_misstemp,file = 'NES14_clean_misstemp.RData',compress= TRUE)
-load(file = 'NES14_clean_misstemp.RData')
+#  save(NES14_clean_misstemp,file = 'Generated Quantities/NES14_clean_misstemp.RData',compress= TRUE)
+load(file = 'Generated Quantities/NES14_clean_misstemp.RData')
 # # # 
 
 NES14_clean_list = list()
@@ -1583,13 +1583,13 @@ dev.off()
 
 
 
-pdf(file = paste('Plots/sample_v_pop.summary.pdf',sep=""),width = 12.5,height = 3.5)
+pdf(file = paste('Plots/sample_v_pop.summary.pdf',sep=""),width = 9.5,height = 3.5)
 par(mfrow = c(1,3),oma=c(0, 0, 0, 0),xpd = TRUE)
 plot(y = temp_sf_ind,
      x = temp_NES_ind[colnames(temp_sf_ind)],
      main = paste("marginals: pop v. NES 2014",sep = ""),
      xlim = c(0,1),ylim = c(0,1),
-     pch = pch_temp,bty = "n",xlab = '% in sample',ylab = '% in pop')
+     pch = 1,bty = "n",xlab = '% in sample',ylab = '% in pop')
 abline(0,1, xpd=FALSE)
 legend("topleft",
        legend = c(paste("cor:",
@@ -1621,7 +1621,7 @@ plot(y = temp_sf_ind,
      x = temp_OS_AMT_ind[colnames(temp_sf_ind)],
      main = paste("marginals: pop v. AMT sample",sep = ""),
      xlim = c(0,1),ylim = c(0,1),
-     pch = pch_temp,bty = "n",xlab = '% in sample',ylab = '% in pop')
+     pch = 1,bty = "n",xlab = '% in sample',ylab = '% in pop')
 abline(0,1, xpd=FALSE)
 legend("topleft",
        legend = c(paste("cor:",
@@ -1652,7 +1652,7 @@ plot(y = temp_sf_ind,
      x = temp_OS_FB_ind[colnames(temp_sf_ind)],
      main = paste("marginals: pop v. FB sample",sep = ""),
      xlim = c(0,1),ylim = c(0,1),
-     pch = pch_temp,bty = "n",xlab = '% in sample',ylab = '% in pop')
+     pch = 1,bty = "n",xlab = '% in sample',ylab = '% in pop')
 abline(0,1, xpd=FALSE)
 legend("topleft",
        legend = c(paste("cor:",
@@ -1728,13 +1728,28 @@ WtE = Online_surveys_imp$weeks[which(Online_surveys_imp$Source %in% ultraparamet
   # turnout training data can't include alliance vote as it contains outcome variable 
   survey_T = survey_T[,!"alliance_vote_2014"]
 # correct T to match past election turnout
+  
+  library(anesrake)
+  library(questionr)
+  input = list(PC_vote_choice_14 = prop.table(questionr::wtd.table(stratification_frame$PC_vote_choice_14,weights = stratification_frame$weights)),
+               T = prop.table(questionr::wtd.table(ifelse(stratification_frame$turnout_2014==1,"Yes","No"),weights = stratification_frame$weights)),
+               states = prop.table(questionr::wtd.table(stratification_frame$states,weights = stratification_frame$weights)),
+               gender = prop.table(questionr::wtd.table(stratification_frame$gender,weights = stratification_frame$weights)),
+               age_cat = prop.table(questionr::wtd.table(stratification_frame$age_cat,weights = stratification_frame$weights)),
+               religion = prop.table(questionr::wtd.table(stratification_frame$religion,weights = stratification_frame$weights)),
+               education_level = prop.table(questionr::wtd.table(stratification_frame$education_level,weights = stratification_frame$weights)),
+               income_level = prop.table(questionr::wtd.table(stratification_frame$income_level,weights = stratification_frame$weights)),
+               jati = prop.table(questionr::wtd.table(stratification_frame$jati,weights = stratification_frame$weights))
+               )
+  temp = data.table(survey_T[,names(input)[-which(names(input)=="T")],with=FALSE],T = as.factor(ifelse(T==1,"Yes","No")))
+  T.weights = anesrake(inputter = input,dataframe = temp,caseid = 1:dim(temp)[1],cap = 10,verbose = TRUE,maxit = 1000,pctlim = 0)
   # while(prop.table(table(T))[2]>prop.table(wtd.table(stratification_frame$turnout_2014,weights = stratification_frame$weights))[2]){
   #   T[sample(which(T==1),size = 1)] = 0
   # }
-  # save(T,file = 'Generated Quantities/T.train.RData',compress = TRUE)
-  load(file = 'Generated Quantities/T.train.RData')
   
-prop.table(questionr::wtd.table(stratification_frame$turnout_2014,weights = stratification_frame$weights))
+  #save(T,file = 'Generated Quantities/T.train.RData',compress = TRUE)
+  #load(file = 'Generated Quantities/T.train.RData')
+
 # # # # # 
 # # # # # 
 # # # # # 
@@ -1774,29 +1789,40 @@ data.temp = cbind(T = T, survey_T)
 
 hyperparameters.T = list(var.pop = dim(data.temp)[2]-1,
                          sample.fraction = 1/3,
-                         min.node.size = 0.1*dim(data.temp)[1],
+                         min.node.size = 30,#0.1*dim(data.temp)[1],
                          num.trees_training = 1500)
-# T_model_stupid = ranger (formula = T~.,
-#                          data = data.temp,
-#                          num.trees = hyperparameters.T$num.trees_training,
-#                          mtry = hyperparameters.T$var.pop,
-#                          sample.fraction = hyperparameters.T$sample.fraction,
-#                          importance = 'permutation',
-#                          write.forest = TRUE,
-#                          min.node.size = hyperparameters.T$min.node.size,
-#                         probability = FALSE,
-#                         classification = FALSE,
-#                          keep.inbag = TRUE,
-#                          replace = FALSE,
-#                          verbose = TRUE)
+ T_model_stupid = ranger (formula = T~.,
+                          data = data.temp,
+                          num.trees = hyperparameters.T$num.trees_training,
+                          mtry = hyperparameters.T$var.pop,
+                          sample.fraction = hyperparameters.T$sample.fraction,
+                         importance = 'permutation',
+                          write.forest = TRUE,
+                          case.weights = T.weights$weightvec,
+                          min.node.size = hyperparameters.T$min.node.size,
+                          probability = FALSE,
+                          classification = FALSE,
+                          keep.inbag = TRUE,
+                          replace = FALSE,
+                          verbose = TRUE)
 gc()
+# How variable are teh predictions ? if not very, this is a good indication that the hyper-parameters need tuning. 
+# Select relevant variables from strat from
+X.test = stratification_frame_augmented[,colnames(stratification_frame_augmented) %in%  T_model_stupid $forest$independent.variable.names|
+                                          colnames(stratification_frame_augmented) == "weights",with=FALSE]
+# aggregate over same variables 
+X.test = X.test[,lapply(.SD,sum),by = c(colnames(X.test)[-which(colnames(X.test)=="weights")]),.SDcols = c("weights")]
+# is there enough variance in the predictions across cells ? if not, turnout is not going to have alot of impact on results 
+T.pred.SF = predict(T_model_stupid,verbose = TRUE,data = X.test)
+pdf(file = 'Plots/T_pred_cross_cell_density.pdf',width = 5,height = 5)
+hist(T.pred.SF $predictions,main = 'turnout predictions over cells',xlab = 'probability of turnout',xlim = c(0,1))
+dev.off()
 
-# temp_VIM_p = importance_pvalues(T_model_stupid, method = "altmann", formula =  T~.,data = data.temp)
-# save(temp_VIM_p ,file = 'Generated Quantities/VIM_T.RData',compress = TRUE)
+#temp_VIM_p = importance_pvalues(T_model_stupid, method = "altmann", formula =  T~.,data = data.temp)
+#save(temp_VIM_p ,file = 'Generated Quantities/VIM_T.RData',compress = TRUE)
 load(file = 'Generated Quantities/VIM_T.RData')
-# save(T_model_stupid,file = 'Generated Quantities/T_model_stupid.RData',compress = TRUE)
+#save(T_model_stupid,file = 'Generated Quantities/T_model_stupid.RData',compress = TRUE)
 load(file = 'Generated Quantities/T_model_stupid.RData')
-
 
 
 # Vote
@@ -1809,26 +1835,26 @@ hyperparameters.V = list(var.pop = dim(cbind(V = V, survey_Z_data,WtE = WtE,P = 
                          min.node.size = 0.1*dim(survey_Z_data)[1],
                          num.trees_training = 1500)
 V_model_stupid = list()
-#  for(j in levels(V)){
-#    V_model_prob_temp = ranger (formula = V_star~.,
-#                                data = cbind(V_star = ifelse(V==j,1,0), survey_Z_data,WtE = WtE,P = P),
-#                                num.trees = hyperparameters.V$num.trees_training,
-#                                mtry = hyperparameters.V$var.pop,
-#                                sample.fraction = hyperparameters.V$sample.fraction,
-#                                case.weights = survey_T_pred,
-#                                importance = 'permutation',
-#                                write.forest = TRUE,
-#                                min.node.size = hyperparameters.V$min.node.size,
-#                                probability = FALSE,
-#                                classification = FALSE,
-#                                keep.inbag = TRUE,
-#                                replace = FALSE,
-#                                verbose = TRUE)
-#    V_model_stupid = append(V_model_stupid,list(V_model_prob_temp))
-#    print(j)
-#  }
+  for(j in levels(V)){
+    V_model_prob_temp = ranger (formula = V_star~.,
+                                data = cbind(V_star = ifelse(V==j,1,0), survey_Z_data,WtE = WtE,P = P),
+                                num.trees = hyperparameters.V$num.trees_training,
+                                mtry = hyperparameters.V$var.pop,
+                                sample.fraction = hyperparameters.V$sample.fraction,
+                                case.weights = survey_T_pred,
+                                importance = 'permutation',
+                                write.forest = TRUE,
+                                min.node.size = hyperparameters.V$min.node.size,
+                                probability = FALSE,
+                                classification = FALSE,
+                                keep.inbag = TRUE,
+                                replace = FALSE,
+                                verbose = TRUE)
+    V_model_stupid = append(V_model_stupid,list(V_model_prob_temp))
+    print(j)
+}
 
-#  save(V_model_stupid,file = 'Generated Quantities/V_model_stupid.RData',compress = TRUE)
+save(V_model_stupid,file = 'Generated Quantities/V_model_stupid.RData',compress = TRUE)
 load(file = 'Generated Quantities/V_model_stupid.RData')
 
 #  temp_VIM_V_OTHER_p = importance_pvalues(V_model_stupid[[1]], 
@@ -1960,7 +1986,7 @@ dev.off()
 # # # # #
 # # # # #
 # # # # #
-n.sims = 500
+n.sims = 1000
 library(parallel)
 # Select relevant variables from strat fram
 dim(stratification_frame_augmented)
@@ -2133,6 +2159,12 @@ var_truncated = ifelse(var>=var_limit,var_limit,var)
 # sims 
 beta_params =as.data.table(estBetaParams(mu=mu_truncated,var=var_truncated))
 turnout_sims = t(sapply(1:dim(beta_params)[1],function(x){rbeta(n = n.sims,shape1 = beta_params$alpha[x],shape2 = beta_params$beta[x])}))
+# some missng values due to degenerate distribution - 1 with almost 0 variance - replace sims with 1 directly
+for(i in 1:dim(turnout_sims)[2]){
+  if(sum(is.na(turnout_sims[,i]))>0){
+    turnout_sims[which(is.na(turnout_sims[,i]) ),i] = 1
+  }
+}
 # simulate vote choice 
 V_sims_list = list()
 for(i in grep("pred.week",colnames( X.test))){
@@ -2193,6 +2225,10 @@ V.redundant.cells_list = c()
 for(q in 1:length(unique(as.numeric(gsub(".*?([0-9]+).*", "\\1", colnames( X.test)[grep("pred.week",colnames( X.test))]))))){
   V.redundant.cells_list = c(V.redundant.cells_list,V.redundant.cells + (q-1)*dim(X.test)[1] )
 }
+
+table(X.test[which(is.na(turnout_sims[,1])),]$T_preds)
+apply(turnout_sims,2,function(x){sum(is.na(x))})
+
 #
 NAT_RESULTS = list()
 STATE_RESULTS = list()
@@ -2203,6 +2239,7 @@ for(draw in 1:n.sims){
   start.time.draw = Sys.time()
   print(paste("start time for this draw :",start.time.draw))
   start.time = Sys.time()
+
 
 PREDS_temp = data.table()
 for(w_id in sort(as.integer(as.factor(unique(as.numeric(gsub(".*?([0-9]+).*", "\\1", colnames( X.test)[grep("pred.week",colnames( X.test))]))))))){
@@ -2328,6 +2365,8 @@ gc()
 end.time.draw = Sys.time()
 print(paste('time taken for this draw:',difftime(end.time.draw,start.time.draw,units = 'mins'),"mins"))
 }
+
+load(file = 'Generated Quantities/NAT_RESULTS.RData')
 
 # # # # # 
 # # # # # 
@@ -2628,7 +2667,8 @@ OTHER_estimate = c(round(mean(apply(temp_xx,2,table)[which(rownames(apply(temp_x
                                                               "Vote_Share_Percentage.UPA",
                                                               "Vote_Share_Percentage.OTHER")],1,function(x){which(x==max(x))})])["OTHER"],temp19$OTHER),
 OTHER_error = c(89-round(mean(apply(temp_xx,2,table)[which(rownames(apply(temp_xx,2,table))=="OTHER"),])),
-                table(c("NDA","UPA","OTHER")[apply(HIST[HIST$Year==2014,c("Vote_Share_Percentage.NDA","Vote_Share_Percentage.UPA","Vote_Share_Percentage.OTHER")],1,function(x){which(x==max(x))})])["OTHER"],89 - temp19$OTHER),
+                89-table(c("NDA","UPA","OTHER")[apply(HIST[HIST$Year==2014,c("Vote_Share_Percentage.NDA","Vote_Share_Percentage.UPA","Vote_Share_Percentage.OTHER")],1,function(x){which(x==max(x))})])["OTHER"],
+                89 - temp19$OTHER),
 NDA_UPA_Lead_Estimate = c(round(mean(apply(temp_xx,2,table)[which(rownames(apply(temp_xx,2,table))=="NDA"),])-mean(apply(temp_xx,2,table)[which(rownames(apply(temp_xx,2,table))=="UPA"),])),
                           table(c("NDA","UPA","OTHER")[apply(HIST[HIST$Year==2014,
                                                                   c("Vote_Share_Percentage.NDA",
@@ -2783,7 +2823,7 @@ range(apply(temp_xx,2,table)[which(rownames(apply(temp_xx,2,table))=="NDA"),])
 
 pdf(file = 'Plots/NAT_turnout_density.pdf',width = 5.5,height = 4)
 hist(NAT_RES_TABLE$T_W[NAT_RES_TABLE$WtE==1],main = 'national turnout density',xlab = 'turnout proportion',ylab = 'frequency',
-     xlim = c(.60,.75),border = 'white',col = 'darkgrey')
+     xlim = c(.65,.85),border = 'white',col = 'darkgrey')
 abline(v = mean(NAT_RES_TABLE$T_W[NAT_RES_TABLE$WtE==1]),col = 'black',lwd = 1)
 abline(v = nat_res_obs$T_pred,col = 'black',lty = 2)
 legend("topright",legend = c(paste("T obs:",round(nat_res_obs$T_pred,3)),
@@ -2793,4 +2833,59 @@ lty = c(2,1),
 bty = "n")
 dev.off()
 
-range(NAT_RES_TABLE$T_W)
+# # # # # 
+# # # # # 
+# # # # # 
+# # # # # 
+# # # # # Constituency-level predictions - no model
+# # # # # 
+# # # # # 
+# # # # # 
+# # # # # 
+HIST = fread(file = 'Generated Quantities/HIST.csv')
+H_temp = HIST[which(HIST$Year==2014),c("State","Zones","PC_name","Vote_Share_Percentage.NDA","Vote_Share_Percentage.UPA","Vote_Share_Percentage.OTHER")]
+USwing_Winner_list = data.table()
+delta_list = c()
+
+
+NAT_RES_TABLE = prop.table(table(Online_surveys_imp$PC_vote_choice[which(Online_surveys_imp$turnout==1 & Online_surveys_imp$weeks==6)]))
+NAT_RES_TABLE$T = mean(Online_surveys_imp$turnout[Online_surveys_imp$weeks==6])
+  
+  x = cbind(T_pred = NAT_RES_TABLE$T,
+            V_NDA_pred =  NAT_RES_TABLE$NDA,
+            V_OTHER_pred =  NAT_RES_TABLE$OTHER,
+            V_UPA_pred =  NAT_RES_TABLE$UPA )
+  y = as.numeric(as.character(unlist(nat_res_obs)))[match(colnames(x),colnames(nat_res_obs))]
+  x = as.numeric(as.character(unlist(x)))
+  
+  delta = 100*x[-1]-unique(HIST[which(HIST$Year==2014),c("NAT_Percentage.Votes.NDA","NAT_Percentage.Votes.UPA","NAT_Percentage.Votes.OTHER")])
+  USwing_Preds = cbind(H_temp[,c("State","Zones","PC_name")],
+                       foreach(i = 1:dim(H_temp)[1],.combine = 'rbind') %do% 
+                         (H_temp[i,c("Vote_Share_Percentage.NDA","Vote_Share_Percentage.UPA","Vote_Share_Percentage.OTHER")] + delta))
+  USwing_Winner = apply(H_temp[,c("Vote_Share_Percentage.NDA","Vote_Share_Percentage.UPA","Vote_Share_Percentage.OTHER")] ,1,function(x){c("NDA","UPA","OTHER")[which(x==max(x))]})
+  USwing_Winner_list  = cbind(USwing_Winner_list ,USwing_Winner)
+
+  # # # # Calculate new seat total simulations
+  temp_xx = 
+    c("NDA","UPA","OTHER")[apply(
+      as.matrix(t(  
+        sapply(1:dim(H_temp)[1],function(x){
+          as.numeric(as.character(unlist(
+            (H_temp[x,c("Vote_Share_Percentage.NDA","Vote_Share_Percentage.UPA","Vote_Share_Percentage.OTHER")] + delta)
+          )))
+        })
+      )),
+      1,function(z){which(z==max(z))})
+    ]
+  
+  
+  
+  print(xtable(  data.table(Alliance = c("NDA","OTHER","UPA"),
+                            pct_Vote =   x [-1],
+                            U.Swing.Pred = as.numeric(as.character(unlist(table(temp_xx)))),
+                            No.Model.Error = c(table(temp_xx)["NDA"]-354,
+                                               table(temp_xx)["OTHER"]-89,
+                                               table(temp_xx)["UPA"]-99)
+                            )), include.rownames=FALSE)
+  
+

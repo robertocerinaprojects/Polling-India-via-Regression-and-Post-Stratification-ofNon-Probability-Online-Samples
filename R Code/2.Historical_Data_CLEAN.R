@@ -1307,3 +1307,384 @@ HIST[which(HIST$Year=="2014"),][which(!complete.cases(HIST[which(HIST$Year=="201
 fwrite(HIST,"Generated Quantities/HIST.csv",row.names=FALSE)
 fwrite(HIST_zones,"Generated Quantities/HIST_Zones.csv",row.names=FALSE)
 
+hist.temp = fread("Generated Quantities/HIST.csv")
+hist.temp = hist.temp[hist.temp$Turnout_Percentage!=0,] # some constituencies didn't exist at various points in time and they have 0 turnout and 0 vote - drop these
+pdf(file = 'Plots/constituency_historical_turnout.pdf',width = 7.5, height = 7.5)
+par(mfrow = c(2,2))
+# # # constituency-level turnout over time
+plot(y = hist.temp$Turnout_Percentage,x = hist.temp$Year,pch = NA,xlab = 'year',ylab = "% turnout",main = "constituency turnout over time")
+for(i in 1:length(unique(paste(hist.temp$State,hist.temp$PC_name)))){
+lines(y = hist.temp$Turnout_Percentage[which(paste(hist.temp$State,hist.temp$PC_name)==unique(paste(hist.temp$State,hist.temp$PC_name))[i])],
+      x = hist.temp$Year[which(paste(hist.temp$State,hist.temp$PC_name)==unique(paste(hist.temp$State,hist.temp$PC_name))[i])],
+      col = adjustcolor("black",0.10))
+}
+lines(y = hist.temp[,lapply(.SD,mean),by = c("Year"),.SDcols = c("Turnout_Percentage")]$Turnout_Percentage,
+      x = hist.temp[,lapply(.SD,mean),by = c("Year"),.SDcols = c("Turnout_Percentage")]$Year,
+      col = adjustcolor("red",1),lwd = 2)
+lines(y = hist.temp[,lapply(.SD,mean),by = c("Year"),.SDcols = c("Turnout_Percentage")]$Turnout_Percentage + 1.96*hist.temp[,lapply(.SD,sd),by = c("Year"),.SDcols = c("Turnout_Percentage")]$Turnout_Percentage,
+      x = hist.temp[,lapply(.SD,mean),by = c("Year"),.SDcols = c("Turnout_Percentage")]$Year,
+      col = adjustcolor("red",1),lwd = 2,lty = 2)
+lines(y = hist.temp[,lapply(.SD,mean),by = c("Year"),.SDcols = c("Turnout_Percentage")]$Turnout_Percentage - 1.96*hist.temp[,lapply(.SD,sd),by = c("Year"),.SDcols = c("Turnout_Percentage")]$Turnout_Percentage,
+      x = hist.temp[,lapply(.SD,mean),by = c("Year"),.SDcols = c("Turnout_Percentage")]$Year,
+      col = adjustcolor("red",1),lwd = 2,lty = 2)
+# # # year-on-year correlation
+plot(y = hist.temp$Turnout_Percentage,x = hist.temp$LAG_Turnout_Percentage,
+     pch = 1,xlab = '% turnout (t-1)',ylab = "% turnout (t)",
+     main = "constituency turnout correlation with lag(1)",
+     ylim = c(0,100),xlim = c(0,100),col = adjustcolor('black',0.10))
+abline(0,1)
+y = hist.temp$Turnout_Percentage[complete.cases(hist.temp[,c("Turnout_Percentage","LAG_Turnout_Percentage")])]
+x = hist.temp$LAG_Turnout_Percentage[complete.cases(hist.temp[,c("Turnout_Percentage","LAG_Turnout_Percentage")])]
+fit <- predict(loess(formula =y~x),
+               se=T)
+j <- order(x)
+lines(x = x[j],y =fit$fit[j],col = 'red')
+lines(x = x[j],y =fit$fit[j] + 3*fit$se.fit[j],col = 'red',lty = 2)
+lines(x = x[j],y =fit$fit[j] - 3*fit$se.fit[j],col = 'red',lty = 2)
+legend("topleft",
+       legend = c(paste("cor:",round(cor(x = hist.temp$LAG_Turnout_Percentage,y = hist.temp$Turnout_Percentage,use = 'pairwise.complete.obs'),3)),
+                  paste('bias:',round(mean(hist.temp$Turnout_Percentage- hist.temp$LAG_Turnout_Percentage,na.rm=T),3)))
+)
+#
+plot(y = hist.temp$Turnout_Percentage,x = hist.temp$LAG2_Turnout_Percentage,
+     pch = 1,xlab = '% turnout (t-2)',ylab = "% turnout (t)"
+     ,main = "constituency turnout correlation with lag(2)",
+     ylim = c(0,100),xlim = c(0,100),col = adjustcolor('black',0.10))
+abline(0,1)
+y = hist.temp$Turnout_Percentage[complete.cases(hist.temp[,c("Turnout_Percentage","LAG2_Turnout_Percentage")])]
+x = hist.temp$LAG2_Turnout_Percentage[complete.cases(hist.temp[,c("Turnout_Percentage","LAG2_Turnout_Percentage")])]
+fit <- predict(loess(formula =y~x),
+               se=T)
+j <- order(x)
+lines(x = x[j],y =fit$fit[j],col = 'red')
+lines(x = x[j],y =fit$fit[j] + 3*fit$se.fit[j],col = 'red',lty = 2)
+lines(x = x[j],y =fit$fit[j] - 3*fit$se.fit[j],col = 'red',lty = 2)
+legend("topleft",
+       legend =c( paste("cor:",round(cor(x = hist.temp$LAG2_Turnout_Percentage,y = hist.temp$Turnout_Percentage,use = 'pairwise.complete.obs'),3)),
+                  paste('bias:',round(mean(hist.temp$Turnout_Percentage- hist.temp$LAG2_Turnout_Percentage,na.rm=T),3))))
+#
+plot(y = hist.temp$Turnout_Percentage,x = hist.temp$LAG3_Turnout_Percentage,
+     pch = 1,xlab = '% turnout (t-3)',ylab = "% turnout (t)"
+     ,main = "constituency turnout correlation with lag(3)",
+     ylim = c(0,100),xlim = c(0,100),col = adjustcolor('black',0.10))
+abline(0,1)
+y = hist.temp$Turnout_Percentage[complete.cases(hist.temp[,c("Turnout_Percentage","LAG3_Turnout_Percentage")])]
+x = hist.temp$LAG3_Turnout_Percentage[complete.cases(hist.temp[,c("Turnout_Percentage","LAG3_Turnout_Percentage")])]
+fit <- predict(loess(formula =y~x),
+               se=T)
+j <- order(x)
+lines(x = x[j],y =fit$fit[j],col = 'red')
+lines(x = x[j],y =fit$fit[j] + 3*fit$se.fit[j],col = 'red',lty = 2)
+lines(x = x[j],y =fit$fit[j] - 3*fit$se.fit[j],col = 'red',lty = 2)
+legend("topleft",
+       legend = c(
+         paste("cor:",round(cor(x = hist.temp$LAG3_Turnout_Percentage,y = hist.temp$Turnout_Percentage,use = 'pairwise.complete.obs'),3)),
+         paste('bias:',round(mean(hist.temp$Turnout_Percentage- hist.temp$LAG3_Turnout_Percentage,na.rm=T),3))
+         ))
+dev.off()
+
+
+# test Uniform Swing under Bayesian model
+rm(list=ls())
+options(scipen=999)
+setwd("~/Desktop/India 2019/")
+library(data.table)
+library(reshape2)
+library(R2jags)
+
+uswing.data = fread("Generated Quantities/HIST.csv")
+
+uswing.data $Year = uswing.data $Year
+uswing.data $PC_name = as.factor(uswing.data $PC_name)
+
+uswing.data $NDA.swing.con = uswing.data $Vote_Share_Percentage.NDA-uswing.data $LAG_Vote_Share_Percentage.NDA
+uswing.data $UPA.swing.con = uswing.data $Vote_Share_Percentage.UPA-uswing.data $LAG_Vote_Share_Percentage.UPA
+uswing.data $OTHER.swing.con = uswing.data $Vote_Share_Percentage.OTHER-uswing.data $LAG_Vote_Share_Percentage.OTHER
+
+uswing.data $NDA.nat.swing.con = uswing.data $NAT_Percentage.Votes.NDA-uswing.data $LAG_NAT_Percentage.Votes.NDA
+uswing.data $UPA.nat.swing.con = uswing.data $NAT_Percentage.Votes.UPA-uswing.data $LAG_NAT_Percentage.Votes.UPA
+uswing.data $OTHER.nat.swing.con = uswing.data $NAT_Percentage.Votes.OTHER-uswing.data $LAG_NAT_Percentage.Votes.OTHER
+
+# look at swing since 1989, which is the year in which BJP became a serious contender
+pdf(file = 'Plots/swing_analysis.pdf',width = 10, height = 10)
+par(mfrow = c(3,3))
+# # # # # # # 
+# # # # # # # 
+# # # # # # # 
+plot(y = uswing.data $NDA.swing.con[uswing.data $Year>=1989] ,
+     x = uswing.data $Year[uswing.data $Year>=1989],
+     pch = NA,main = 'NDA swing',
+     ylab = 'swing (% points)',xlab = 'election year',xaxt = "n")
+axis(side = 1,at = uswing.data $Year,labels = uswing.data $Year,las = 3)
+for(c in 1:nlevels(uswing.data $PC_name)){
+lines(y = uswing.data $NDA.swing.con[uswing.data $Year>=1989 & uswing.data $PC_name==levels(uswing.data $PC_name)[c]] ,
+      x = uswing.data $Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+      col = adjustcolor('orange',0.25))
+}
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                       .SD = c("NDA.swing.con"),
+                       by = c("Year")]$NDA.swing.con + 
+          2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                       .SD = c("NDA.swing.con"),
+                       by = c("Year")]$NDA.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("NDA.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("NDA.swing.con"),
+                      by = c("Year")]$NDA.swing.con + 
+        -2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("NDA.swing.con"),
+                      by = c("Year")]$NDA.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("NDA.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("NDA.swing.con"),
+                      by = c("Year")]$NDA.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("NDA.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 3)
+lines(y = uswing.data$NDA.nat.swing.con[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[1]],
+      x = uswing.data$Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[1]],
+      col = 'black',lty = 1)
+legend('topleft',legend = c("national swing","constituency swing",
+                            "mu +/- 2sd","mu"),col = c('red','orange','black','black'),
+       lty = c(1,1,2,3))
+# residual (non-national) swing
+uswing.data $NDA.residual.swing = uswing.data $NDA.swing.con - uswing.data $NDA.nat.swing.con
+plot(y = uswing.data $NDA.residual.swing[uswing.data $Year>=1989],
+     x = uswing.data $Year[uswing.data $Year>=1989],
+     pch = NA,main = 'NDA residual swing',
+     ylab = 'swing (% points)',xlab = 'election year',xaxt = "n")
+axis(side = 1,at = uswing.data $Year,labels = uswing.data $Year,las = 3)
+for(c in 1:nlevels(uswing.data $PC_name)){
+  lines(y = uswing.data $NDA.residual.swing[uswing.data $Year>=1989 & uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+        x = uswing.data $Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+        col = adjustcolor('orange',0.25))
+}
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("NDA.residual.swing"),
+                      by = c("Year")]$NDA.residual.swing + 
+        2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("NDA.residual.swing"),
+                      by = c("Year")]$NDA.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("NDA.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("NDA.residual.swing"),
+                      by = c("Year")]$NDA.residual.swing + 
+        -2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                       .SD = c("NDA.residual.swing"),
+                       by = c("Year")]$NDA.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("NDA.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("NDA.residual.swing"),
+                      by = c("Year")]$NDA.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("NDA.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 3)
+
+legend('topleft',legend = c("mu +/- 2sd","mu"),col = c('black','black'),
+       lty = c(2,3))
+# density 
+plot(density(uswing.data $NDA.residual.swing[uswing.data $Year>=1989],na.rm=T),
+     main = 'NDA residual swing',
+     xlab = 'swing (% points)')
+abline(v = 0,lty = 2)
+# # # # # # # 
+# # # # # # # 
+# # # # # # # 
+plot(y = uswing.data $UPA.swing.con[uswing.data $Year>=1989] ,
+     x = uswing.data $Year[uswing.data $Year>=1989],
+     pch = NA,main = 'UPA swing',
+     ylab = 'swing (% points)',xlab = 'election year',xaxt = "n")
+axis(side = 1,at = uswing.data $Year,labels = uswing.data $Year,las = 3)
+for(c in 1:nlevels(uswing.data $PC_name)){
+  lines(y = uswing.data $UPA.swing.con[uswing.data $Year>=1989 & uswing.data $PC_name==levels(uswing.data $PC_name)[c]] ,
+        x = uswing.data $Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+        col = adjustcolor('skyblue',0.25))
+}
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("UPA.swing.con"),
+                      by = c("Year")]$UPA.swing.con + 
+        2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("UPA.swing.con"),
+                      by = c("Year")]$UPA.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("UPA.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("UPA.swing.con"),
+                      by = c("Year")]$UPA.swing.con + 
+        -2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                       .SD = c("UPA.swing.con"),
+                       by = c("Year")]$UPA.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("UPA.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("UPA.swing.con"),
+                      by = c("Year")]$UPA.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("UPA.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 3)
+lines(y = uswing.data$UPA.nat.swing.con[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[1]],
+      x = uswing.data$Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[1]],
+      col = 'black',lty = 1)
+legend('topleft',legend = c("national swing","constituency swing",
+                            "mu +/- 2sd","mu"),col = c('blue','skyblue','black','black'),
+       lty = c(1,1,2,3))
+# residual (non-national) swing
+uswing.data $UPA.residual.swing = uswing.data $UPA.swing.con - uswing.data $UPA.nat.swing.con
+plot(y = uswing.data $UPA.residual.swing[uswing.data $Year>=1989],
+     x = uswing.data $Year[uswing.data $Year>=1989],
+     pch = NA,main = 'UPA residual swing',
+     ylab = 'swing (% points)',xlab = 'election year',xaxt = "n")
+axis(side = 1,at = uswing.data $Year,labels = uswing.data $Year,las = 3)
+for(c in 1:nlevels(uswing.data $PC_name)){
+  lines(y = uswing.data $UPA.residual.swing[uswing.data $Year>=1989 & uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+        x = uswing.data $Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+        col = adjustcolor('skyblue',0.25))
+}
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("UPA.residual.swing"),
+                      by = c("Year")]$UPA.residual.swing + 
+        2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("UPA.residual.swing"),
+                      by = c("Year")]$UPA.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("UPA.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("UPA.residual.swing"),
+                      by = c("Year")]$UPA.residual.swing + 
+        -2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                       .SD = c("UPA.residual.swing"),
+                       by = c("Year")]$UPA.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("UPA.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("UPA.residual.swing"),
+                      by = c("Year")]$UPA.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("UPA.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 3)
+
+legend('topleft',legend = c("mu +/- 2sd","mu"),col = c('black','black'),
+       lty = c(2,3))
+# density 
+plot(density(uswing.data $UPA.residual.swing[uswing.data $Year>=1989],na.rm=T),
+     main = 'UPA residual swing',
+     xlab = 'swing (% points)')
+abline(v = 0,lty = 2)
+# # # # # # # 
+# # # # # # # 
+# # # # # # # 
+plot(y = uswing.data $OTHER.swing.con[uswing.data $Year>=1989] ,
+     x = uswing.data $Year[uswing.data $Year>=1989],
+     pch = NA,main = 'OTHER swing',
+     ylab = 'swing (% points)',xlab = 'election year',xaxt = "n")
+axis(side = 1,at = uswing.data $Year,labels = uswing.data $Year,las = 3)
+for(c in 1:nlevels(uswing.data $PC_name)){
+  lines(y = uswing.data $OTHER.swing.con[uswing.data $Year>=1989 & uswing.data $PC_name==levels(uswing.data $PC_name)[c]] ,
+        x = uswing.data $Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+        col = adjustcolor('gray',0.25))
+}
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("OTHER.swing.con"),
+                      by = c("Year")]$OTHER.swing.con + 
+        2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("OTHER.swing.con"),
+                      by = c("Year")]$OTHER.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("OTHER.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("OTHER.swing.con"),
+                      by = c("Year")]$OTHER.swing.con + 
+        -2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                       .SD = c("OTHER.swing.con"),
+                       by = c("Year")]$OTHER.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("OTHER.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("OTHER.swing.con"),
+                      by = c("Year")]$OTHER.swing.con,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("OTHER.swing.con"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 3)
+lines(y = uswing.data$OTHER.nat.swing.con[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[1]],
+      x = uswing.data$Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[1]],
+      col = 'black',lty = 1)
+legend('topleft',legend = c("national swing","constituency swing",
+                            "mu +/- 2sd","mu"),col = c('darkgray','gray','black','black'),
+       lty = c(1,1,2,3))
+# residual (non-national) swing
+uswing.data $OTHER.residual.swing = uswing.data $OTHER.swing.con - uswing.data $OTHER.nat.swing.con
+plot(y = uswing.data $OTHER.residual.swing[uswing.data $Year>=1989],
+     x = uswing.data $Year[uswing.data $Year>=1989],
+     pch = NA,main = 'OTHER residual swing',
+     ylab = 'swing (% points)',xlab = 'election year',xaxt = "n")
+axis(side = 1,at = uswing.data $Year,labels = uswing.data $Year,las = 3)
+for(c in 1:nlevels(uswing.data $PC_name)){
+  lines(y = uswing.data $OTHER.residual.swing[uswing.data $Year>=1989 & uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+        x = uswing.data $Year[uswing.data $Year>=1989& uswing.data $PC_name==levels(uswing.data $PC_name)[c]],
+        col = adjustcolor('gray',0.25))
+}
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("OTHER.residual.swing"),
+                      by = c("Year")]$OTHER.residual.swing + 
+        2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("OTHER.residual.swing"),
+                      by = c("Year")]$OTHER.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("OTHER.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("OTHER.residual.swing"),
+                      by = c("Year")]$OTHER.residual.swing + 
+        -2*uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                       .SD = c("OTHER.residual.swing"),
+                       by = c("Year")]$OTHER.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("OTHER.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 2)
+lines(y = uswing.data[,lapply(.SD,function(x){mean(x,na.rm=T)}),
+                      .SD = c("OTHER.residual.swing"),
+                      by = c("Year")]$OTHER.residual.swing,
+      x = uswing.data[,lapply(.SD,function(x){sd(x,na.rm=T)}),
+                      .SD = c("OTHER.residual.swing"),
+                      by = c("Year")]$Year,
+      col = 'black',lty = 3)
+
+legend('topleft',legend = c("mu +/- 2sd","mu"),col = c('black','black'),
+       lty = c(2,3))
+# density 
+plot(density(uswing.data $OTHER.residual.swing[uswing.data $Year>=1989],na.rm=T),
+     main = 'OTHER residual swing',
+     xlab = 'swing (% points)')
+abline(v = 0,lty = 2)
+dev.off()
